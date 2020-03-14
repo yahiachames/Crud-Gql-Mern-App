@@ -33,6 +33,20 @@ var resolvers = {
       return await Users.findOneAndDelete({
         _id: args.id
       });
+    },
+    updateUser: async (_, args) => {
+      var newData = {};
+      if (args.name) Object.assign(newData, { name: args.name });
+      if (args.email) Object.assign(newData, { email: args.email });
+      if (args.age) Object.assign(newData, { age: args.age });
+
+      console.log(newData);
+      return await Users.findOneAndUpdate(
+        {
+          _id: args.id
+        },
+        newData
+      );
     }
   }
 };
