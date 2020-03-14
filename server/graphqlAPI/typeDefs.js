@@ -12,6 +12,7 @@ var typeDefs = gql`
   type Mutation {
     initUser: User
     addUser(name: String!, email: String!, age: Int!): User!
+    deleteUser(id: ID!): User!
   }
 `;
 module.exports = typeDefs;

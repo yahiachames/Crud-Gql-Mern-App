@@ -1,4 +1,5 @@
 const Users = require("../models/userSchema");
+const mongoose = require("mongoose");
 
 var resolvers = {
   Query: {
@@ -27,6 +28,11 @@ var resolvers = {
         age: args.age
       });
       return await user.save();
+    },
+    deleteUser: async (_, args) => {
+      return await Users.findOneAndDelete({
+        _id: args.id
+      });
     }
   }
 };
