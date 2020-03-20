@@ -22,5 +22,9 @@ var typeDefs = gql`
       imgLink: String!
     ): User!
   }
+
+  type Subscription {
+    userIsChanged: User
+  }
 `;
 module.exports = typeDefs;

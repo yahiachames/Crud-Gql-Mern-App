@@ -9,7 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import { Container } from "@material-ui/core";
 import { gql } from "apollo-boost";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
 import "./App.css";
 //modal
 import Modal from "@material-ui/core/Modal";
@@ -18,6 +18,17 @@ import Fade from "@material-ui/core/Fade";
 //components
 import AddUser from "./addUser";
 import UpdateUser from "./updateUser";
+
+const SUBSCRIBE_TO_USER = gql`
+  subscription {
+    userIsChanged {
+      name
+      email
+      age
+      imgLink
+    }
+  }
+`;
 
 const GET_USERS = gql`
   {
@@ -60,21 +71,22 @@ const Link =
 
 function App() {
   const classes = useStyles();
-  const { data, loading, error } = useQuery(GET_USERS);
-  const [deleteUser, { dataa, loadingg, errorr }] = useMutation(DELETE_USER);
+  const { data, loading, error, refetch } = useQuery(GET_USERS);
+  const [
+    deleteUser,
+    { data: DeleteData, loading: DeleteLoading, error: DeleteError }
+  ] = useMutation(DELETE_USER);
+  const {
+    data: subdata,
+    loading: subloading,
+    error: suberror
+  } = useSubscription(SUBSCRIBE_TO_USER);
+  console.log(subdata);
+  console.log(subloading);
+  console.log(suberror);
 
-  // const users = [
-  //   <User
-  //     name='chames'
-  //     email='yahiachames@gmail.com'
-  //     age='21'
-  //     imgLink={Link}
-  //   />,
-  //   <User />,
-  //   <User />,
-  //   <User />,
-  //   <User />
-  // ];
+  if (subdata) refetch();
+
   const [openAddUser, setOpenAddUser] = React.useState(false);
   const [openUpdateUser, setOpenUpdateUser] = React.useState(false);
 
@@ -92,6 +104,7 @@ function App() {
 
   if (loading) return <div> loading... </div>;
   if (error) return <div> {error.message} </div>;
+
   return (
     <Container
       style={{

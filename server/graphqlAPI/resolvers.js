@@ -1,5 +1,8 @@
 const Users = require("../models/userSchema");
 const mongoose = require("mongoose");
+const { PubSub } = require("apollo-server-express");
+const pubsub = new PubSub();
+const USER_IS_CHANGED = "USER_IS_CHANGED";
 
 var resolvers = {
   Query: {
@@ -30,12 +33,16 @@ var resolvers = {
         age: args.age,
         imgLink: args.imgLink
       });
+      pubsub.publish(USER_IS_CHANGED, { userIsChanged: args });
       return await user.save();
     },
     deleteUser: async (_, args) => {
-      return await Users.findOneAndDelete({
+      const deletedUser = Users.findOneAndDelete({
         _id: args.id
       });
+      pubsub.publish(USER_IS_CHANGED, { userIsChanged: deletedUser });
+      console.log(deletedUser);
+      return deletedUser;
     },
     updateUser: async (_, args) => {
       var newData = {};
@@ -44,13 +51,18 @@ var resolvers = {
       if (args.age) Object.assign(newData, { age: args.age });
       if (args.imgLink) Object.assign(newData, { imgLink: args.imgLink });
 
-      console.log(newData);
+      pubsub.publish(USER_IS_CHANGED, { userIsChanged: args });
       return await Users.findOneAndUpdate(
         {
           _id: args.id
         },
         newData
       );
+    }
+  },
+  Subscription: {
+    userIsChanged: {
+      subscribe: () => pubsub.asyncIterator([USER_IS_CHANGED])
     }
   }
 };
